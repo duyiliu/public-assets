@@ -2,50 +2,116 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Cyberpunk Chest · 3D Preview</title>
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <title>Cyberpunk Chest · 360° 3D Preview</title>
   <style>
     *{box-sizing:border-box}
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#070a11;color:#fff;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#070a11;color:#fff;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;touch-action:none}
     body{background:radial-gradient(circle at 50% 18%,#24304d 0,#101522 42%,#06080d 100%)}
-    .shell{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto}
-    header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px 8px;z-index:2;pointer-events:none}
+    #app{position:fixed;inset:0}
+    canvas{display:block;width:100%;height:100%}
+    header{position:fixed;top:0;left:0;right:0;z-index:4;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;pointer-events:none}
     .title{font-size:15px;font-weight:750;letter-spacing:.03em}
-    .hint{font-size:12px;opacity:.58}
-    model-viewer{width:100%;height:100%;background:transparent;--poster-color:transparent}
-    footer{padding:8px 16px 18px;text-align:center;font-size:12px;opacity:.58;pointer-events:none}
+    .hint{font-size:12px;opacity:.62}
+    footer{position:fixed;left:0;right:0;bottom:0;z-index:4;padding:12px 16px 18px;text-align:center;font-size:12px;opacity:.62;pointer-events:none}
     .pill{display:inline-block;padding:6px 10px;border:1px solid rgba(255,255,255,.13);border-radius:999px;background:rgba(255,255,255,.05);backdrop-filter:blur(10px)}
-    .error{position:fixed;inset:0;display:none;place-items:center;padding:28px;text-align:center;background:#090b10;z-index:10}
+    #error{position:fixed;inset:0;display:none;place-items:center;padding:28px;text-align:center;background:#090b10;z-index:10}
   </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+    }
+  }
+  </script>
 </head>
 <body>
-  <div class="shell">
-    <header>
-      <div class="title">CYBERPUNK CHEST · GLB</div>
-      <div class="hint">拖动旋转 · 双指/滚轮缩放</div>
-    </header>
-    <model-viewer
-      src="../assets/cyberpunk_chest_v2.glb"
-      camera-controls
-      auto-rotate
-      rotation-per-second="18deg"
-      shadow-intensity="1.25"
-      shadow-softness=".8"
-      exposure="1.15"
-      environment-image="neutral"
-      interaction-prompt="none"
-      camera-orbit="35deg 70deg auto"
-      min-camera-orbit="auto 15deg 55%"
-      max-camera-orbit="auto 90deg 400%"
-      alt="赛博朋克宝箱 3D 模型">
-    </model-viewer>
-    <footer><span class="pill">真实 GLB · 在线交互预览</span></footer>
-  </div>
-  <div class="error" id="error">模型加载失败，请刷新页面重试。</div>
-  <script>
-    const viewer=document.querySelector('model-viewer');
-    viewer.addEventListener('error',()=>document.getElementById('error').style.display='grid');
+  <div id="app"></div>
+  <header>
+    <div class="title">CYBERPUNK CHEST · TRUE 360°</div>
+    <div class="hint">单指自由旋转 · 双指缩放/移动</div>
+  </header>
+  <footer><span class="pill">虚拟轨迹球模式 · 可翻到底部和背面</span></footer>
+  <div id="error">模型加载失败，请刷新页面重试。</div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
+
+    const app = document.getElementById('app');
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.01, 1000);
+    camera.position.set(4.8, 3.2, 4.8);
+
+    const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, powerPreference:'high-performance' });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    app.appendChild(renderer.domElement);
+
+    scene.add(new THREE.HemisphereLight(0xdfe9ff, 0x101018, 2.2));
+
+    const key = new THREE.DirectionalLight(0xffffff, 3.2);
+    key.position.set(4, 6, 5);
+    scene.add(key);
+
+    const rim = new THREE.DirectionalLight(0x64d9ff, 2.0);
+    rim.position.set(-5, 2, -4);
+    scene.add(rim);
+
+    const controls = new TrackballControls(camera, renderer.domElement);
+    controls.rotateSpeed = 3.2;
+    controls.zoomSpeed = 1.2;
+    controls.panSpeed = 0.8;
+    controls.dynamicDampingFactor = 0.12;
+    controls.staticMoving = false;
+
+    const loader = new GLTFLoader();
+    loader.load('../assets/cyberpunk_chest_v2.glb', (gltf) => {
+      const model = gltf.scene;
+      scene.add(model);
+
+      model.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(model);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      const radius = Math.max(size.x, size.y, size.z) * 0.5;
+
+      controls.target.copy(center);
+
+      const distance = Math.max(radius * 3.4, 3.0);
+      camera.position.copy(center).add(new THREE.Vector3(distance, distance * 0.55, distance));
+      camera.near = Math.max(distance / 500, 0.01);
+      camera.far = distance * 100;
+      camera.updateProjectionMatrix();
+
+      controls.minDistance = Math.max(radius * 0.65, 0.4);
+      controls.maxDistance = radius * 10;
+      controls.update();
+    }, undefined, (err) => {
+      console.error(err);
+      document.getElementById('error').style.display = 'grid';
+    });
+
+    function resize() {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+      controls.handleResize();
+    }
+    addEventListener('resize', resize);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
   </script>
 </body>
 </html>
