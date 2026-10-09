@@ -1,0 +1,153 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>霓虹极速 · 赛车游戏</title><style>body{margin:0;background:#080e1f;color:#eef4ff;font-family:system-ui,"Microsoft YaHei",sans-serif;padding:20px}main{max-width:760px;margin:0 auto}#nr-racer-2610{--viz-muted:#a6b2cb;--viz-text:#ecf4ff;--viz-border:#344056;--viz-card:#111c34;--viz-accent:#5765ed;--viz-accent-bg:#25336d}button{cursor:pointer;font-family:inherit}button:disabled{cursor:not-allowed}.w-full{width:100%}.space-y-3>*+*{margin-top:12px}.flex{display:flex}.items-center{align-items:center}.items-start{align-items:flex-start}.justify-between{justify-content:space-between}.justify-center{justify-content:center}.gap-3{gap:12px}.gap-2{gap:8px}.flex-wrap{flex-wrap:wrap}.min-w-0{min-width:0}.flex-1{flex:1}.grid{display:grid}.grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.relative{position:relative}.absolute{position:absolute}.inset-0{inset:0}.top-0{top:0}.left-0{left:0}.right-0{right:0}.bottom-3{bottom:12px}.left-3{left:12px}.overflow-hidden{overflow:hidden}.rounded-2xl{border-radius:16px}.rounded-full{border-radius:999px}.rounded-xl{border-radius:12px}.text-center{text-align:center}.text-xs{font-size:12px}.text-sm{font-size:14px}.text-2xl{font-size:24px}.sm\:text-3xl{font-size:30px}.text-white{color:white}.font-bold{font-weight:700}.font-black{font-weight:900}.font-medium{font-weight:500}.font-semibold{font-weight:600}.tracking-widest{letter-spacing:.12em}.tracking-tight{letter-spacing:-.02em}.leading-relaxed{line-height:1.5}.mt-1{margin-top:4px}.mt-2{margin-top:8px}.mb-1{margin-bottom:4px}.mb-2{margin-bottom:8px}.mb-5{margin-bottom:20px}.p-5{padding:20px}.py-1{padding-top:4px;padding-bottom:4px}.py-2\.5{padding-top:10px;padding-bottom:10px}.py-3{padding-top:12px;padding-bottom:12px}.px-3{padding-left:12px;padding-right:12px}.px-4{padding-left:16px;padding-right:16px}.px-8{padding-left:32px;padding-right:32px}.border{border:1px solid transparent}.pointer-events-none{pointer-events:none}.flex-col{flex-direction:column}</style></head><body><main><div id="nr-racer-2610" class="w-full space-y-3">
+  <div class="flex items-center justify-between gap-3 flex-wrap">
+    <div class="min-w-0">
+      <div class="text-xs font-semibold tracking-widest" style="color:var(--viz-muted)">ARCADE / NIGHT CITY</div>
+      <div class="text-sm font-medium mt-1" style="color:var(--viz-text)">3 条车道 · 无限竞速 · 3 次碰撞机会</div>
+    </div>
+    <span class="text-xs rounded-full px-3 py-1 border" style="border-color:var(--viz-border);color:var(--viz-muted)">单机 · 即开即玩</span>
+  </div>
+  <div class="nr-stage relative overflow-hidden rounded-2xl">
+    <canvas id="nr-canvas" tabindex="0" aria-label="霓虹竞速游戏画面。躲避前方车辆，使用下方按钮或方向键驾驶。"></canvas>
+    <div class="nr-hud absolute top-0 left-0 right-0 px-3 py-3 flex items-start justify-between gap-3 pointer-events-none">
+      <div class="nr-hud-left flex gap-2">
+        <div class="nr-chip"><span>速度</span><b><em id="nr-speed">0</em> <small>km/h</small></b></div>
+        <div class="nr-chip"><span>里程</span><b><em id="nr-distance">0</em> <small>m</small></b></div>
+        <div class="nr-chip nr-pass"><span>超车</span><b><em id="nr-overtakes">0</em> <small>辆</small></b></div>
+      </div>
+      <div class="nr-life"><small>生命</small><strong id="nr-life">♥ ♥ ♥</strong></div>
+    </div>
+    <div id="nr-overlay" class="nr-overlay absolute inset-0 flex items-center justify-center p-5">
+      <div class="nr-overlay-card text-center w-full">
+        <div class="nr-kicker mb-2">N I G H T &nbsp; R U S H</div>
+        <h3 id="nr-overlay-title" class="text-2xl sm:text-3xl font-black tracking-tight text-white">霓虹极速</h3>
+        <p id="nr-overlay-desc" class="text-sm mt-2 mb-5 leading-relaxed">穿梭夜色车流，超车得分，氮气冲刺！</p>
+        <button type="button" id="nr-action" class="nr-action px-8 py-3 rounded-xl font-bold text-sm">▶ 开始比赛</button>
+      </div>
+    </div>
+    <div class="nr-track-label absolute bottom-3 left-3 text-xs font-semibold tracking-widest pointer-events-none">NIGHT CITY <span>···</span> INFINITE RUN</div>
+  </div>
+  <div class="flex items-center gap-3">
+    <div class="min-w-0 flex-1">
+      <div class="flex items-center justify-between mb-1 text-xs" style="color:var(--viz-muted)"><span>⚡ 氮气储备</span><span id="nr-nitro-text">100%</span></div>
+      <div class="nr-meter"><div id="nr-nitro-fill" style="width:100%"></div></div>
+    </div>
+    <button id="nr-pause" type="button" class="nr-pause text-sm font-medium px-4 py-2.5 rounded-xl" disabled>⏸ 暂停</button>
+  </div>
+  <div class="grid grid-cols-4 gap-2 nr-controls">
+    <button type="button" data-drive="left" class="nr-control"><span class="nr-symbol">◀</span><span>左转</span></button>
+    <button type="button" data-drive="right" class="nr-control"><span class="nr-symbol">▶</span><span>右转</span></button>
+    <button type="button" data-drive="brake" class="nr-control"><span class="nr-symbol">▰</span><span>刹车</span></button>
+    <button type="button" data-drive="boost" class="nr-control nr-boost"><span class="nr-symbol">⚡</span><span>氮气加速</span></button>
+  </div>
+  <p class="text-xs leading-relaxed" style="color:var(--viz-muted)">手机长按按钮操控；电脑用 ← → / A D 转向，↑ / Shift 氮气，↓ 刹车，空格暂停。</p>
+  <style>
+    #nr-racer-2610 .nr-stage{background:#070a18;border:1px solid #333852;isolation:isolate}
+    #nr-racer-2610 canvas{display:block;width:100%;height:auto;aspect-ratio:1.64;outline-offset:-3px;touch-action:pan-y}
+    #nr-racer-2610 .nr-hud{z-index:2}
+    #nr-racer-2610 .nr-chip,#nr-racer-2610 .nr-life{border:1px solid rgba(198,217,255,.15);background:rgba(8,13,32,.70);backdrop-filter:blur(8px);border-radius:11px;padding:7px 10px;color:#fff}
+    #nr-racer-2610 .nr-chip span,#nr-racer-2610 .nr-life small{font-size:10px;color:#b4bfd6;display:block}
+    #nr-racer-2610 .nr-chip b{display:block;font-size:20px;line-height:1.22;font-variant-numeric:tabular-nums}
+    #nr-racer-2610 .nr-chip em{font-style:normal}
+    #nr-racer-2610 .nr-chip b small{font-weight:500;font-size:10px;color:#b4bfd6}
+    #nr-racer-2610 .nr-life{text-align:right;white-space:nowrap}
+    #nr-racer-2610 .nr-life strong{display:block;color:#fb7696;letter-spacing:2px;font-size:16px;line-height:1.5}
+    #nr-racer-2610 .nr-overlay{z-index:3;background:linear-gradient(180deg,rgba(7,9,27,.34),rgba(8,11,30,.72));transition:opacity .15s}
+    #nr-racer-2610 .nr-overlay[hidden]{display:none}
+    #nr-racer-2610 .nr-overlay-card{max-width:340px;padding:25px 18px;background:rgba(9,13,32,.85);border:1px solid rgba(166,193,255,.21);border-radius:20px;backdrop-filter:blur(13px);box-shadow:0 15px 65px rgba(0,0,0,.24)}
+    #nr-racer-2610 .nr-overlay-card p{color:#cad4e8}
+    #nr-racer-2610 .nr-kicker{color:#84eaff;font-size:10px;font-weight:800;letter-spacing:3px}
+    #nr-racer-2610 .nr-action{background:var(--viz-accent);color:white;min-height:46px;min-width:165px}
+    #nr-racer-2610 .nr-action:hover{filter:brightness(1.10)}
+    #nr-racer-2610 .nr-track-label{color:rgba(210,231,252,.55);font-size:9px;letter-spacing:1.5px}
+    #nr-racer-2610 .nr-track-label span{color:#fa62b8;padding:0 5px}
+    #nr-racer-2610 .nr-meter{height:9px;border-radius:999px;background:var(--viz-border);overflow:hidden}
+    #nr-racer-2610 #nr-nitro-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#18a8d9,#65e7ff);transition:width .12s}
+    #nr-racer-2610 .nr-pause{min-height:44px;color:var(--viz-text);border:1px solid var(--viz-border);background:var(--viz-card)}
+    #nr-racer-2610 .nr-pause:disabled{opacity:.45;cursor:not-allowed}
+    #nr-racer-2610 .nr-control{display:flex;align-items:center;justify-content:center;gap:5px;flex-direction:column;min-height:67px;min-width:0;border-radius:13px;border:1px solid var(--viz-border);background:var(--viz-card);color:var(--viz-text);font-size:11px;font-weight:600;touch-action:none;user-select:none;-webkit-user-select:none}
+    #nr-racer-2610 .nr-symbol{font-size:22px;line-height:1.2;font-weight:800}
+    #nr-racer-2610 .nr-control:active,#nr-racer-2610 .nr-control.nr-pressed{border-color:var(--viz-accent);background:var(--viz-accent-bg);transform:translateY(1px)}
+    #nr-racer-2610 .nr-boost{border-color:#2a839b;background:rgba(29,164,201,.09)}
+    #nr-racer-2610 button:focus-visible,#nr-racer-2610 canvas:focus-visible{outline:3px solid var(--viz-accent);outline-offset:2px}
+    @media(max-width:480px){#nr-racer-2610 canvas{aspect-ratio:.91}#nr-racer-2610 .nr-chip{padding:6px 7px}#nr-racer-2610 .nr-chip b{font-size:17px}#nr-racer-2610 .nr-hud-left{gap:5px}#nr-racer-2610 .nr-life{padding:6px 7px}#nr-racer-2610 .nr-life strong{font-size:12px}#nr-racer-2610 .nr-overlay-card{padding:20px 12px}#nr-racer-2610 .nr-pass{display:none}#nr-racer-2610 .nr-track-label{font-size:8px}}
+    @media(prefers-reduced-motion:reduce){#nr-racer-2610 *{transition:none!important}}
+  </style>
+  <script>
+  (() => {
+    const root=document.getElementById('nr-racer-2610');
+    if(!root||root.dataset.ready==='1') return;
+    root.dataset.ready='1';
+    const c=root.querySelector('#nr-canvas'),ctx=c.getContext('2d');
+    const ui={speed:root.querySelector('#nr-speed'),distance:root.querySelector('#nr-distance'),overtakes:root.querySelector('#nr-overtakes'),life:root.querySelector('#nr-life'),nitro:root.querySelector('#nr-nitro-fill'),nitroText:root.querySelector('#nr-nitro-text'),pause:root.querySelector('#nr-pause'),overlay:root.querySelector('#nr-overlay'),title:root.querySelector('#nr-overlay-title'),desc:root.querySelector('#nr-overlay-desc'),action:root.querySelector('#nr-action')};
+    if(!ctx){ui.desc.textContent='当前浏览器不支持 Canvas 游戏画面';return;}
+    let W=700,H=425,dpr=1,raf=0,last=0,drag=false;
+    const keys={left:false,right:false,brake:false,boost:false};
+    let s;
+    const rnd=(a,b)=>a+Math.random()*(b-a);
+    const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+    const colors=['#ffbd55','#ff629f','#a7a7ff','#6de0a6','#e3e7f4'];
+    const laneValues=[-.70,0,.70];
+    function reset(){s={phase:'ready',x:0,speed:156,distance:0,passed:0,health:3,nitro:100,score:0,combo:0,clock:0,inv:0,flash:0,shake:0,spawn:1.15,traffic:[{lane:-.70,z:.30,color:colors[0]},{lane:.70,z:.52,color:colors[2]}]};for(const k in keys)keys[k]=false;root.querySelectorAll('[data-drive]').forEach(b=>b.classList.remove('nr-pressed'));hud();render();}
+    function geometry(p){const t=Math.pow(clamp(p,0,1.08),1.55);const horizon=H*.32;const y=horizon+(H-horizon)*t;const half=W*(.058+.405*t);const bend=Math.sin(s.distance*.00065+(1-p)*2.05)*W*.047+Math.sin(s.distance*.00023+(1-p)*3.6)*W*.014*(1-p);return{y,half,cx:W*.5+bend};}
+    function polygon(points,color){ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);for(let i=1;i<points.length;i++)ctx.lineTo(points[i][0],points[i][1]);ctx.closePath();ctx.fill();}
+    function resize(){const r=c.getBoundingClientRect();if(!r.width||!r.height)return;W=r.width;H=r.height;dpr=Math.min(2,window.devicePixelRatio||1);c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);render();}
+    function skyline(){const horizon=H*.32;const sky=ctx.createLinearGradient(0,0,0,horizon+45);sky.addColorStop(0,'#070d27');sky.addColorStop(.58,'#272155');sky.addColorStop(1,'#9a4878');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+      const haze=ctx.createRadialGradient(W*.76,horizon*.56,3,W*.76,horizon*.56,W*.32);haze.addColorStop(0,'rgba(240,104,180,.35)');haze.addColorStop(1,'rgba(240,104,180,0)');ctx.fillStyle=haze;ctx.fillRect(0,0,W,horizon+80);
+      for(let i=0;i<46;i++){const x=(Math.sin(i*93.37)*.5+.5)*W,y=(Math.sin(i*43.17)*.5+.5)*horizon*.85;ctx.fillStyle=i%4===0?'rgba(172,229,255,.8)':'rgba(245,236,255,.48)';ctx.fillRect(x,y,i%6===0?2:1,i%6===0?2:1);}
+      ctx.beginPath();ctx.arc(W*.78,horizon*.42,Math.max(14,W*.038),0,Math.PI*2);ctx.fillStyle='#f5cee5';ctx.fill();
+      polygon([[0,horizon],[W*.14,horizon-H*.12],[W*.29,horizon],[W*.46,horizon-H*.11],[W*.61,horizon],[W*.80,horizon-H*.18],[W,horizon-H*.025],[W,horizon+8],[0,horizon+8]],'#342c57');
+      for(let i=0;i<36;i++){let bw=W*.023+(i%4)*W*.005,x=i*W/35-3,h=H*(.035+((i*7)%10)*.008);ctx.fillStyle=i%3?'#131932':'#181b3a';ctx.fillRect(x,horizon-h,bw,h+8);if(i%2===0){ctx.fillStyle='rgba(104,181,224,.33)';for(let j=1;j<4;j++){const wy=horizon-h+j*h/5;ctx.fillRect(x+bw*.25,wy,Math.max(1,bw*.12),2);ctx.fillRect(x+bw*.65,wy,Math.max(1,bw*.10),2);}}}
+      ctx.fillStyle='#221a36';ctx.fillRect(0,horizon,W,H-horizon);
+    }
+    function road(){const n=50,phase=Math.floor(s.distance/12);for(let i=0;i<n;i++){const g1=geometry(i/n),g2=geometry((i+1)/n);const alt=(Math.floor(i/3)+phase)%2===0;
+        polygon([[g1.cx-g1.half,g1.y],[g1.cx+g1.half,g1.y],[g2.cx+g2.half,g2.y],[g2.cx-g2.half,g2.y]],alt?'#20273d':'#242c43');
+        const curb=alt?'#e889c0':'#e7eeff';
+        polygon([[g1.cx-g1.half*1.09,g1.y],[g1.cx-g1.half,g1.y],[g2.cx-g2.half,g2.y],[g2.cx-g2.half*1.09,g2.y]],curb);
+        polygon([[g1.cx+g1.half,g1.y],[g1.cx+g1.half*1.09,g1.y],[g2.cx+g2.half*1.09,g2.y],[g2.cx+g2.half,g2.y]],curb);
+        if((Math.floor(i/3)+Math.floor(s.distance/22))%3!==0)for(const sign of [-1,1]){const w1=Math.max(.4,g1.half*.009),w2=Math.max(.6,g2.half*.009),x1=g1.cx+sign*g1.half/3,x2=g2.cx+sign*g2.half/3;polygon([[x1-w1,g1.y],[x1+w1,g1.y],[x2+w2,g2.y],[x2-w2,g2.y]],'rgba(193,219,242,.69)');}
+      }
+      for(let i=0;i<10;i++){const p=(i+(s.distance%125)/125)/10;if(p<.10||p>1)continue;const g=geometry(p),z=Math.pow(p,1.5),poleH=H*(.015+.15*z);for(const side of [-1,1]){const x=g.cx+side*g.half*1.26,y=g.y;ctx.strokeStyle='rgba(97,204,255,.65)';ctx.lineWidth=Math.max(1,W*.0027*z);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y-poleH);ctx.lineTo(x-side*W*.013*z,y-poleH);ctx.stroke();ctx.fillStyle=i%2===0?'#fa70d1':'#8eefff';ctx.beginPath();ctx.arc(x-side*W*.013*z,y-poleH,Math.max(1.3,W*.006*z),0,Math.PI*2);ctx.fill();}}
+      if(keys.boost&&s.phase==='playing'&&s.nitro>0){ctx.strokeStyle='rgba(124,220,255,.26)';for(let i=0;i<15;i++){const p=((i*67+s.clock*290)%100)/100,g=geometry(p),x=g.cx+Math.sin(i*21)*g.half*.85;ctx.lineWidth=1+2*p;ctx.beginPath();ctx.moveTo(x,g.y);ctx.lineTo(x,g.y+H*.08*p);ctx.stroke();}}
+    }
+    function car(x,y,w,color,player=false){const h=w*1.52;ctx.save();ctx.translate(x,y);if(player){const lean=(keys.right?1:0)-(keys.left?1:0);ctx.rotate(lean*.042);}
+      ctx.fillStyle='rgba(0,0,0,.46)';ctx.beginPath();ctx.ellipse(0,-h*.22,w*.61,h*.45,0,0,Math.PI*2);ctx.fill();
+      if(player){ctx.shadowColor='#15dcff';ctx.shadowBlur=w*.55;}ctx.fillStyle='#090c1b';ctx.fillRect(-w*.55,-h*.74,w*.20,h*.49);ctx.fillRect(w*.35,-h*.74,w*.20,h*.49);
+      const body=ctx.createLinearGradient(-w*.5,0,w*.5,0);body.addColorStop(0,'#192538');body.addColorStop(.19,color);body.addColorStop(.54,color);body.addColorStop(.82,color);body.addColorStop(1,'#172038');
+      polygon([[-w*.39,0],[-w*.50,-h*.21],[-w*.43,-h*.79],[-w*.27,-h*.96],[w*.27,-h*.96],[w*.43,-h*.79],[w*.50,-h*.21],[w*.39,0]],body);ctx.shadowBlur=0;
+      polygon([[-w*.32,-h*.70],[w*.32,-h*.70],[w*.245,-h*.87],[-w*.245,-h*.87]],'#15334b');
+      polygon([[-w*.33,-h*.58],[w*.33,-h*.58],[w*.39,-h*.41],[-w*.39,-h*.41]],'rgba(13,28,47,.78)');
+      ctx.fillStyle='rgba(241,250,255,.36)';ctx.fillRect(-w*.29,-h*.76,w*.58,Math.max(1,w*.025));
+      ctx.fillStyle=player?'#ff487a':'#ff5274';ctx.fillRect(-w*.41,-h*.22,w*.24,h*.065);ctx.fillRect(w*.17,-h*.22,w*.24,h*.065);
+      ctx.fillStyle='#f1f3ff';ctx.fillRect(-w*.19,-h*.055,w*.38,Math.max(1,w*.025));
+      if(player&&keys.boost&&s.nitro>0&&s.phase==='playing'){ctx.fillStyle='#64eaff';polygon([[-w*.22,0],[-w*.06,0],[-w*.14,h*(.24+Math.random()*.16)]],'#60e7ff');polygon([[w*.06,0],[w*.22,0],[w*.14,h*(.24+Math.random()*.16)]],'#60e7ff');}
+      ctx.restore();}
+    function traffic(){s.traffic.slice().sort((a,b)=>a.z-b.z).forEach(v=>{if(v.z<=0||v.z>1.13)return;const g=geometry(v.z),w=W*(.024+.082*Math.pow(v.z,1.5));car(g.cx+v.lane*g.half*.83,g.y,w,v.color);});}
+    function player(){const g=geometry(.87),bottom=H*.935,w=clamp(W*.127,34,86);if(s.inv>0&&Math.floor(s.clock*15)%2===0)return;car(g.cx+s.x*geometry(1).half*.83,bottom,w,'#3ddbf2',true);}
+    function render(){if(!s)return;ctx.clearRect(0,0,W,H);ctx.save();if(s.shake>0)ctx.translate((Math.random()-.5)*s.shake*9,(Math.random()-.5)*s.shake*6);skyline();road();traffic();player();ctx.restore();if(s.flash>0){ctx.fillStyle='rgba(255,74,121,'+(.14*s.flash)+')';ctx.fillRect(0,0,W,H);}}
+    function hud(){ui.speed.textContent=Math.round(s.speed);ui.distance.textContent=Math.round(s.distance).toLocaleString('zh-CN');ui.overtakes.textContent=s.passed;ui.life.textContent='♥ '.repeat(s.health)+'♡ '.repeat(3-s.health);ui.nitro.style.width=Math.round(s.nitro)+'%';ui.nitroText.textContent=Math.round(s.nitro)+'%';ui.pause.disabled=s.phase==='ready'||s.phase==='over';ui.pause.textContent=s.phase==='paused'?'▶ 继续':'⏸ 暂停';}
+    function screen(title,desc,action){ui.title.textContent=title;ui.desc.textContent=desc;ui.action.textContent=action;ui.overlay.hidden=false;}
+    function begin(){if(s.phase==='ready'||s.phase==='over')reset();s.phase='playing';ui.overlay.hidden=true;hud();last=0;if(!raf)raf=requestAnimationFrame(frame);c.focus({preventScroll:true});}
+    function stop(){if(raf){cancelAnimationFrame(raf);raf=0;}last=0;}
+    function pause(){if(s.phase==='playing'){s.phase='paused';stop();screen('比赛暂停','调整节奏，再次出发！','▶ 继续比赛');}else if(s.phase==='paused'){begin();}hud();render();}
+    function end(){s.phase='over';screen('比赛结束','完成 '+Math.round(s.distance).toLocaleString('zh-CN')+' 米 · 超车 '+s.passed+' 辆 · 得分 '+Math.round(s.score),'↻ 再来一局');hud();}
+    function update(dt){s.clock+=dt;s.inv=Math.max(0,s.inv-dt);s.flash=Math.max(0,s.flash-dt*2.5);s.shake=Math.max(0,s.shake-dt*2.6);
+      if(keys.left)s.x-=dt*1.58;if(keys.right)s.x+=dt*1.58;s.x=clamp(s.x,-.87,.87);
+      const boosting=keys.boost&&s.nitro>0&&!keys.brake;const target=keys.brake?68:boosting?298:177;s.speed+=(target-s.speed)*Math.min(1,dt*(boosting?1.9:1.25));
+      s.nitro=clamp(s.nitro+(boosting?-31:3.5)*dt,0,100);s.distance+=s.speed*dt/3.6;s.score+=s.speed*dt*.07;
+      s.spawn-=dt;if(s.spawn<=0){s.traffic.push({lane:laneValues[Math.floor(Math.random()*3)],z:.03,color:colors[Math.floor(Math.random()*colors.length)]});s.spawn=rnd(.72,1.31)*(190/Math.max(125,s.speed));}
+      for(const v of s.traffic){v.z+=s.speed*dt/845;if(!v.hit&&s.inv<=0&&v.z>.855&&v.z<1.01&&Math.abs(s.x-v.lane)<.32){v.hit=true;s.health--;s.speed*=.63;s.inv=1.25;s.flash=1;s.shake=1;s.combo=0;if(s.health<=0){end();break;}}if(v.z>1.075&&!v.hit){v.hit=true;s.passed++;s.combo++;s.score+=100+Math.min(10,s.combo)*20;s.nitro=clamp(s.nitro+5,0,100);}}
+      s.traffic=s.traffic.filter(v=>v.z<1.14&&!v.hit);}
+    function frame(t){raf=0;if(s.phase!=='playing')return;const dt=last?clamp((t-last)/1000,0,.045):.016;last=t;update(dt);render();hud();if(s.phase==='playing')raf=requestAnimationFrame(frame);}
+    ui.action.addEventListener('click',begin);
+    ui.pause.addEventListener('click',pause);
+    const binding={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowDown:'brake',KeyS:'brake',ArrowUp:'boost',ShiftLeft:'boost',ShiftRight:'boost',KeyW:'boost'};
+    root.addEventListener('keydown',e=>{if(e.target instanceof HTMLInputElement||e.target instanceof HTMLTextAreaElement)return;if(binding[e.code]){e.preventDefault();keys[binding[e.code]]=true;}else if(e.code==='Space'&&!e.repeat){e.preventDefault();if(s.phase==='ready'||s.phase==='over')begin();else pause();}});
+    root.addEventListener('keyup',e=>{if(binding[e.code]){e.preventDefault();keys[binding[e.code]]=false;}});
+    root.addEventListener('focusout',e=>{if(!root.contains(e.relatedTarget))for(const k in keys)keys[k]=false;});
+    root.querySelectorAll('[data-drive]').forEach(btn=>{const k=btn.dataset.drive;const off=()=>{keys[k]=false;btn.classList.remove('nr-pressed');};btn.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true;btn.classList.add('nr-pressed');if(btn.setPointerCapture)btn.setPointerCapture(e.pointerId);});btn.addEventListener('pointerup',off);btn.addEventListener('pointercancel',off);btn.addEventListener('lostpointercapture',off);});
+    if('ResizeObserver'in window)new ResizeObserver(resize).observe(c);else window.addEventListener('resize',resize);
+    reset();resize();screen('霓虹极速','穿梭夜色车流，超车得分，氮气冲刺！','▶ 开始比赛');
+  })();
+  </script>
+</div>
+</main></body></html>
