@@ -31,5 +31,6 @@ jobs:
           git add models/gt_racecar_3d.glb
           if ! git diff --staged --quiet; then
             git commit -m "assets: build GT racing car GLB"
+            git pull --rebase origin main
             git push
           fi
