@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GT 赛车 · 3D 交互预览</title>
+<script type="module" src="https://unpkg.com/@google/model-viewer@4.1.0/dist/model-viewer.min.js"></script>
+<style>
+:root{color-scheme:dark;font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:#090d15;color:#e9eef5}
+main{max-width:1240px;margin:0 auto;padding:24px}h1{font-size:26px;margin:6px 0 8px}
+p{color:#aebccc;font-size:14px;margin:0 0 24px}
+model-viewer{width:100%;height:72vh;min-height:420px;background:radial-gradient(ellipse,#333e50,#0a111c 65%);border:1px solid #253246;border-radius:18px;--poster-color:transparent}
+a{display:inline-block;text-decoration:none;color:#fff;background:#25384e;padding:10px 18px;border-radius:8px;margin:18px 10px 0 0}
+.small{font-size:13px;color:#94a3b8;margin-top:20px}
+</style>
+</head>
+<body>
+<main>
+<h1>GT Racing · 3D 赛车模型</h1>
+<p>真正的 GLB 网格模型 · 左键拖动旋转 · 滚轮缩放 · 右键平移</p>
+<model-viewer src="./gt_racecar_3d.glb" camera-controls auto-rotate shadow-intensity="1.1" exposure="1.1" environment-image="neutral" interaction-prompt="auto" camera-orbit="35deg 72deg 7m" alt="黑红涂装原创 GT 赛车 3D 模型"></model-viewer>
+<div><a href="./gt_racecar_3d.glb" download>下载 GLB 模型</a><a href="./gt_racecar_generator.py">查看生成脚本</a></div>
+<div class="small">使用 Web Components / model-viewer；浏览器需要支持 WebGL。</div>
+</main>
+</body>
+</html>
